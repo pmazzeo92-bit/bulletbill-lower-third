@@ -1,1 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bullet Bill - BANG Banner (OBS Overlay)</title>
+  <style>
+    :root{
+      /* Tweak these */
+      --duration: 3.2s;          /* speed (lower = faster) */
+      --y: 360px;                /* vertical position */
+      --scale: 1.0;              /* overall size */
+      --loop-gap: 0.3s;          /* tiny pause feel (0 = none) */
+    }
 
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    /* The whole flying rig (bullet + banner) */
+    .rig {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform: translate3d(-700px, var(--y), 0) scale(var(--scale));
+      will-change: transform;
+      animation: fly var(--duration) linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes fly {
+      0%   { transform: translate3d(-700px, var(--y), 0) scale(var(--scale)); }
+      100% { transform: translate3d(2600px, var(--y), 0) scale(var(--scale)); }
+    }
+
+    /* Optional “loop gap”: hide briefly right after it exits */
+    .rig::after{
+      content:"";
+      position:absolute;
+      inset:-200px;
+      animation: gap var(--duration) linear infinite;
+    }
+    @keyframes gap{
+      0%, 98% { opacity: 1; }
+      99%, 100% { opacity: 0; }
+    }
+
+    /* Slight bob + subtle squash for “gamey” motion */
+    .bob {
+      animation: bob 0.55s ease-in-out infinite;
+      transform-origin: center;
+    }
+    @keyframes bob {
+      0%,100% { transform: translateY(0px); }
+      50%     { transform: translateY(-10px); }
+    }
+
+    /* ===== Banner styling ===== */
+    .banner-wrap{
+      position:absolute;
+      left: -520px;   /* behind bullet */
+      top: 26px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      transform-origin: left center;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35));
+    }
+
+    /* Rope line */
+    .rope{
+      width: 70px;
+      height: 6px;
+      background: #7b5a2a;
+      border: 3px solid #3a2a12;
+      border-radius: 999px;
+      transform: rotate(-6deg);
+    }
+
+    /* Cloth banner */
+    .banner{
+      position: relative;
+      width: 420px;
+      height: 120px;
+      background: #ffd34d;
+      border: 8px solid #111;
+      border-radius: 14px;
+      box-shadow: inset 0 0 0 6px rgba(255,255,255,0.25);
+      overflow: hidden;
+      transform: skewX(-6deg);
+    }
+
+    /* Banner “folds” */
+    .banner::before{
+      content:"";
+      position:absolute;
+      left: -60px;
+      top: 0;
+      width: 120px;
+      height: 100%;
+      background: rgba(0,0,0,0.10);
+      transform: skewX(12deg);
+    }
+    .banner::after{
+      content:"";
+      position:absolute;
+      right: -80px;
+      top: 0;
+      width: 140px;
+      height: 100%;
+      background: rgba(0,0,0,0.08);
+      transform: skewX(12deg);
+    }
+
+    /* Little notches on the right edge like a tied banner */
+    .tail{
+      position:absolute;
+      right: -36px;
+      top: 14px;
+      width: 72px;
+      height: 92px;
+      background: #ffd34d;
+      border: 8px solid #111;
+      border-left: none;
+      border-radius: 0 14px 14px 0;
+      transform: skewX(-6deg);
+    }
+    .tail:before{
+      content:"";
+      position:absolute;
+      left: 10px;
+      top: 30px;
+      width: 44px;
+      height: 32px;
+      background:#ffd34d;
+      border: 8px solid #111;
+      border-left:none;
+      border-top:none;
+      transform: rotate(45deg);
+      transform-origin:left top;
+    }
+
+    /* Text */
+    .bang{
+      position:absolute;
+      inset: 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family: Impact, Haettenschweiler, "Arial Black", sans-serif;
+      font-size: 78px;
+      letter-spacing: 2px;
+      color: #e11;
+      -webkit-text-stroke: 8px #111;
+      text-shadow:
+        0 6px 0 rgba(0,0,0,0.25),
+        0 10px 18px rgba(0,0,0,0.25);
+      transform: skewX(6deg);
+      animation: pop 0.55s ease-in-out infinite;
+    }
+    @keyframes pop{
+      0%,100% { transform: skewX(6deg) scale(1); }
+      50%     { transform: skewX(6deg) scale(1.05); }
+    }
+
+    /* ===== Bullet Bill SVG sizing ===== */
+    .bill {
+      width: 520px;
+      height: 220px;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
+    }
+
+    /* Tiny “whoosh” lines */
+    .whoosh{
+      position:absolute;
+      left: -180px;
+      top: 78px;
+      display:flex;
+      gap: 10px;
+      opacity: 0.9;
+    }
+    .whoosh span{
+      display:block;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.85);
+      border: 3px solid rgba(0,0,0,0.65);
+      transform: skewX(-18deg);
+      animation: whoosh 0.35s ease-in-out infinite;
+    }
+    .whoosh span:nth-child(1){ width: 70px; }
+    .whoosh span:nth-child(2){ width: 42px; animation-delay: 0.06s; opacity:0.85; }
+    .whoosh span:nth-child(3){ width: 56px; animation-delay: 0.12s; opacity:0.75; }
+    @keyframes whoosh{
+      0%,100%{ transform: skewX(-18deg) translateX(0); }
+      50%{ transform: skewX(-18deg) translateX(-10px); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="rig">
+    <div class="bob">
+      <div class="banner-wrap">
+        <div class="rope"></div>
+        <div class="banner">
+          <div class="bang">BANG!</div>
+          <div class="tail"></div>
+        </div>
+      </div>
+
+      <div class="whoosh" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+
+      <!-- Bullet Bill (classic-ish SVG) -->
+      <svg class="bill" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bullet Bill">
+        <!-- Body -->
+        <defs>
+          <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#2a2a2a"/>
+            <stop offset="1" stop-color="#0e0e0e"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Main capsule -->
+        <path d="M110,35
+                 C65,35 30,70 30,110
+                 C30,150 65,185 110,185
+                 L360,185
+                 C430,185 490,155 490,110
+                 C490,65 430,35 360,35
+                 Z"
+              fill="url(#gBody)" stroke="#000" stroke-width="10" stroke-linejoin="round"/>
+
+        <!-- Nose shine -->
+        <path d="M95,60
+                 C70,70 55,92 55,112
+                 C55,132 70,154 95,164"
+              fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="10" stroke-linecap="round"/>
+
+        <!-- Mouth line -->
+        <path d="M120,155 C170,175 250,175 310,150"
+              fill="none" stroke="#000" stroke-width="10" stroke-linecap="round"/>
+
+        <!-- Eye white -->
+        <ellipse cx="205" cy="92" rx="70" ry="52" fill="#fff" stroke="#000" stroke-width="10"/>
+        <!-- Eye pupil -->
+        <ellipse cx="220" cy="100" rx="22" ry="22" fill="#000"/>
+
+        <!-- Angry brow -->
+        <path d="M145,70 C185,40 245,40 285,70"
+              fill="none" stroke="#000" stroke-width="16" stroke-linecap="round"/>
+
+        <!-- Arm (back) -->
+        <path d="M300,150
+                 C305,180 335,195 360,180
+                 C385,165 382,135 360,120
+                 C338,105 300,115 300,150 Z"
+              fill="#f6f6f6" stroke="#000" stroke-width="10" stroke-linejoin="round"/>
+
+        <!-- Arm (front) -->
+        <path d="M325,140
+                 C330,175 360,190 388,175
+                 C415,160 412,130 388,112
+                 C365,96 325,105 325,140 Z"
+              fill="#ffffff" stroke="#000" stroke-width="10" stroke-linejoin="round"/>
+
+        <!-- Fist details -->
+        <path d="M360,142 C370,150 385,150 395,142"
+              fill="none" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+
+        <!-- Tail end / exhaust rim -->
+        <path d="M70,60
+                 C50,75 40,92 40,110
+                 C40,128 50,145 70,160"
+              fill="none" stroke="#000" stroke-width="16" stroke-linecap="round"/>
+        <path d="M78,66
+                 C62,78 54,92 54,110
+                 C54,128 62,142 78,154"
+              fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
